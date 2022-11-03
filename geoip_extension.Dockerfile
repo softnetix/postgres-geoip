@@ -1,4 +1,4 @@
-FROM postgres:12.10-alpine3.15
+FROM postgres:12.12-alpine3.16
 
 COPY ip4r/. ip4r
 COPY geoip/. geoip
