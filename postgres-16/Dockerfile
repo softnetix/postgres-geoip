@@ -1,4 +1,4 @@
-FROM postgres:16.6-alpine3.21
+FROM postgres:16.8-alpine3.21
 
 ### install geoip
 COPY ip4r/. ip4r
