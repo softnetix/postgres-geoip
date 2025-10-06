@@ -28,3 +28,7 @@ jobs:
         run: |
           echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin docker.io
           docker buildx build --push --file postgres-17/Dockerfile --tag docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPOSITORY }}:17.2-alpine3.21-${{ github.ref_name }} --platform linux/amd64,linux/arm/v7,linux/arm64/v8 postgres-17
+      - name: Build Postgres 18
+        run: |
+          echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin docker.io
+          docker buildx build --push --file postgres-18/Dockerfile --tag docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPOSITORY }}:18.0-alpine3.21-${{ github.ref_name }} --platform linux/amd64,linux/arm/v7,linux/arm64/v8 postgres-18
