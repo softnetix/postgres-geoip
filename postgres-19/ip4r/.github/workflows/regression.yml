@@ -1,0 +1,59 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+    tags:     [ REL_* ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: sh
+
+    strategy:
+      matrix:
+        pgver:  [ 9.5, 9.6, 10, 11, 12, 13, 14, 15, 16, 17, 18 ]
+        include:
+          - pgrepo: ""
+          - pgver: 19
+            pgrepo: "-pgdg-snapshot"
+
+    env:
+      PG:       ${{ matrix.pgver }}
+      PGREPO:   ${{ matrix.pgrepo }}
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+
+    - name: cleanup pg
+      run: |
+        sudo apt-get -y --purge --no-upgrade remove postgresql libpq-dev libpq5 postgresql-client-common postgresql-common
+        curl https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+        sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" >/etc/apt/sources.list.d/pgdg.list'
+        sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg-snapshot main 19" >/etc/apt/sources.list.d/pgdg-snap.list'
+        sudo apt-get update -qq
+        sudo rm -rf /var/lib/postgresql
+
+    - name: install pg
+      run: |
+        sudo apt-get -y \
+               -o Dpkg::Options::=--force-confdef \
+               -o Dpkg::Options::=--force-confnew \
+               ${PGREPO:+-t "$(lsb_release -cs)$PGREPO"} \
+               install postgresql-${PG:?} postgresql-server-dev-${PG:?}
+        sudo -u postgres createuser -s "$USER"
+
+    - name: build and test
+      run: |
+        make && sudo -E make install && time make installcheck
+
+    - name: show output
+      if: always()
+      run: |
+        cat regression.diffs || true

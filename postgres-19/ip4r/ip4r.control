@@ -1,0 +1,5 @@
+# ip4r
+default_version = '2.4'
+relocatable = 'true'
+module_pathname = '$libdir/ip4r'
+comment = 'data types and operators for storing, indexing, and manipulating IPv4 and IPv6 addresses and ranges'
